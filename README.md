@@ -1,6 +1,7 @@
-## My Project
+## Major version upgrades in Aurora PostgreSQL 
 
-TODO: Fill this README out!
+This repository contains the AWS CloudFormation templates, SQL Scripts and files for the AWS database blog post related to the major version upgrades in Aurora PostgreSQL. 
+
 
 Be sure to:
 
