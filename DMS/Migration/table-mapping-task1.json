@@ -1,0 +1,59 @@
+{
+  "rules": [
+        {
+            "rule-type": "selection", 
+            "rule-id": "1", 
+            "rule-name": "1", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "person"
+            }, 
+            "rule-action": "include"
+        }, 
+        {
+            "rule-type": "selection", 
+            "rule-id": "2", 
+            "rule-name": "2", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sporting_event_ticket"
+            }, 
+            "rule-action": "include"
+        }, 
+        {
+            "rule-type": "selection", 
+            "rule-id": "3", 
+            "rule-name": "3", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "ticket_purchase_hist"
+            }, 
+            "rule-action": "include"
+        },
+        {
+            "rule-type": "table-settings",
+            "rule-id": "4",
+            "rule-name": "4",
+            "object-locator": {
+                "schema-name": "dms_sample",
+                "table-name": "sporting_event_ticket"
+            },
+            "parallel-load": {
+                "type": "ranges",
+                "columns": [
+                    "id"
+                ],
+                "boundaries": [
+                ["6507209913"],
+                ["13014419825"],
+                ["19521629737"],
+                ["26028839649"],
+                ["32536049561"],
+            ["39043259473"],
+            ["45550469385"],
+            ["52057679297"]
+                ]
+            }
+        }
+        ]
+}

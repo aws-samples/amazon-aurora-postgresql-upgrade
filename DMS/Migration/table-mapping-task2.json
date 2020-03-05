@@ -1,0 +1,140 @@
+{
+  "rules": [
+        {
+            "rule-type": "selection", 
+            "rule-id": "1", 
+            "rule-name": "1", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "mlb_data"
+            }, 
+            "rule-action": "include"
+        }, 
+        {
+            "rule-type": "selection", 
+            "rule-id": "2", 
+            "rule-name": "2", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "name_data"
+            }, 
+            "rule-action": "include"
+        }, 
+        {
+            "rule-type": "selection", 
+            "rule-id": "3", 
+            "rule-name": "3", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "nfl_data"
+            }, 
+            "rule-action": "include"
+        },
+           {
+            "rule-type": "selection", 
+            "rule-id": "4", 
+            "rule-name": "4", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "nfl_stadium_data"
+            }, 
+            "rule-action": "include"
+        },
+           {
+            "rule-type": "selection", 
+            "rule-id": "5", 
+            "rule-name": "5", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "player"
+            }, 
+            "rule-action": "include"
+        },
+           {
+            "rule-type": "selection", 
+            "rule-id": "6", 
+            "rule-name": "6", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "seat"
+            }, 
+            "rule-action": "include"
+        },
+           {
+            "rule-type": "selection", 
+            "rule-id": "7", 
+            "rule-name": "7", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "seat_type"
+            }, 
+            "rule-action": "include"
+        },
+
+           {
+            "rule-type": "selection", 
+            "rule-id": "8", 
+            "rule-name": "8", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sport_division"
+            }, 
+            "rule-action": "include"
+        },
+
+           {
+            "rule-type": "selection", 
+            "rule-id": "9", 
+            "rule-name": "9", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sport_league"
+            }, 
+            "rule-action": "include"
+        },
+
+           {
+            "rule-type": "selection", 
+            "rule-id": "10", 
+            "rule-name": "10", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sport_location"
+            }, 
+            "rule-action": "include"
+        },
+
+           {
+            "rule-type": "selection", 
+            "rule-id": "11", 
+            "rule-name": "11", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sport_team"
+            }, 
+            "rule-action": "include"
+        },
+
+           {
+            "rule-type": "selection", 
+            "rule-id": "12", 
+            "rule-name": "12", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sport_type"
+            }, 
+            "rule-action": "include"
+        },
+           {
+            "rule-type": "selection", 
+            "rule-id": "13", 
+            "rule-name": "13", 
+            "object-locator": {
+                "schema-name": "dms_sample", 
+                "table-name": "sporting_event"
+            }
+            , 
+            "rule-action": "include"
+        }
+        ]
+}
