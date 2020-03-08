@@ -1,3 +1,4 @@
+create schema dms_sample;
 CREATE SEQUENCE dms_sample.player_seq
     START WITH 1
     INCREMENT BY 10
