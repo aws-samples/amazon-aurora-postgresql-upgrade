@@ -1,0 +1,488 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Cloudformation template to launch AWS Aurora PostgreSQL Cluster"
+Metadata:
+  LICENSE: Apache License Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Source Database configuration
+      Parameters:
+      - SrcDBClusterName
+      - SrcDBName
+      - SrcDBInstanceClass
+      - SrcDBMasterUsername
+      - SrcDBMasterUserPassword
+      - SrcDBEngineVersion
+    - Label:
+        default: Target Database configuration
+      Parameters:
+      - TgtDBClusterName
+      - TgtDBName
+      - TgtDBInstanceClass
+      - TgtDBMasterUsername
+      - TgtDBMasterUserPassword
+      - TgtDBEngineVersion
+    ParameterLabels:
+      SrcDBClusterName:
+        default: Source Database Cluster name
+      SrcDBName:
+        default: Source Database name
+      SrcDBInstanceClass:
+        default: Source Database instance class
+      SrcDBMasterUsername:
+        default: Source Database master username
+      SrcDBMasterUserPassword: 
+        default: Source Database master password
+      SrcDBEngineVersion:
+        default: Source Database Engine Version
+      TgtDBClusterName:
+        default: Target Database Cluster name
+      TgtDBName:
+        default: Target Database name
+      TgtDBInstanceClass:
+        default: Target Database instance class
+      TgtDBMasterUsername:
+        default: Target Database master username
+      TgtDBMasterUserPassword:
+        default: Target Database master password
+      TgtDBEngineVersion:
+        default: Target Database Engine Version
+Outputs: 
+  StackName:
+    Value: !Ref 'AWS::StackName'
+  Regionname:
+    Value: !Ref 'AWS::Region'
+  VPCid:
+    Value: !GetAtt 
+      - PubSubnet1
+      - VpcId
+  Cloud9Env:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !Ref 'AWS::Region'
+        - .console.aws.amazon.com/cloud9/home/
+        - '?region='
+        - !Ref 'AWS::Region'
+  SubnetID1: 
+    Value: !Ref DBSubnet1
+  SubnetID2: 
+    Value: !Ref DBSubnet2
+  RDSSecurityGrp:
+    Value: !GetAtt 
+      - AuroraVPCSecurityGroup
+      - GroupId
+  SrcDBName: 
+    Description: "Amazon Aurora database name"
+    Value: !Ref SrcDBName
+  SrcRDSEndPoint: 
+    Description: "Full Amazon Aurora endpoint"
+    Value: !Sub ${SrcAuroraDBCluster.Endpoint.Address}:${SrcAuroraDBCluster.Endpoint.Port}/${SrcDBName}
+  TgtDBName: 
+    Description: "Amazon Aurora database name"
+    Value: !Ref TgtDBName
+  TgtRDSEndPoint: 
+    Description: "Full Amazon Aurora endpoint"
+    Value: !Sub ${TgtAuroraDBCluster.Endpoint.Address}:${TgtAuroraDBCluster.Endpoint.Port}/${TgtDBName}
+Mappings:
+  AuroraVersion:
+   "9.6.12":
+     DBClustergroup: aurora-postgresql9.6
+   "10.11":
+     DBClustergroup: aurora-postgresql10
+   "11.6":
+     DBClustergroup: aurora-postgresql11
+Parameters: 
+  SrcDBClusterName:
+    Default: "aurora-source"
+    Description: Specify database cluster name.
+    Type: String 
+  SrcDBEngineVersion:
+    Default: 10.11
+    AllowedValues: 
+      - "9.6.12"
+      - "10.11"
+      - "11.6"
+    Description: "Specify Aurora PostgreSQL database engine version."
+    Type: String
+  SrcDBInstanceClass: 
+    AllowedValues: 
+      - db.r4.large
+      - db.r4.xlarge
+      - db.r4.2xlarge
+      - db.r4.4xlarge
+    ConstraintDescription: "Must select a valid database instance type."
+    Default: db.r4.large
+    Description: "The name of the compute and memory capacity class of the database instance."
+    Type: String
+  SrcDBMasterUserPassword: 
+    Default: auradmin
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
+    Description: "The database admin account password."
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  SrcDBMasterUsername: 
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Default: pgadmin
+    Description: "The database admin account username."
+    MaxLength: "16"
+    MinLength: "1"
+    Type: String
+  SrcDBName: 
+    AllowedPattern: "[a-zA-Z0-9]*"
+    Description: "Name of the Amazon Aurora database."
+    MaxLength: "64"
+    MinLength: "0"
+    Default: 'demo'
+    Type: String
+  TgtDBClusterName:
+    Default: "aurora-target"
+    Description: Specify database cluster name.
+    Type: String 
+  TgtDBEngineVersion:
+    Default: 11.6
+    AllowedValues: 
+      - "9.6.12"
+      - "10.11"
+      - "11.6"
+    Description: "Specify Aurora PostgreSQL database engine version."
+    Type: String
+  TgtDBInstanceClass: 
+    AllowedValues: 
+      - db.r4.large
+      - db.r4.xlarge
+      - db.r4.2xlarge
+      - db.r4.4xlarge
+    ConstraintDescription: "Must select a valid database instance type."
+    Default: db.r4.large
+    Description: "The name of the compute and memory capacity class of the database instance."
+    Type: String
+  TgtDBMasterUserPassword: 
+    Default: auradmin
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
+    Description: "The database admin account password."
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  TgtDBMasterUsername: 
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Default: pgadmin
+    Description: "The database admin account username."
+    MaxLength: "16"
+    MinLength: "1"
+    Type: String
+  TgtDBName: 
+    AllowedPattern: "[a-zA-Z0-9]*"
+    Description: "Name of the Amazon Aurora database."
+    MaxLength: "64"
+    MinLength: "0"
+    Default: 'demo'
+    Type: String
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/20
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  DBSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/25
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+  DBSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/25
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+  PubSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/25
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+  PubSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/25
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+  AttachGateway:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  RouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+  Route:
+    Type: 'AWS::EC2::Route'
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  SubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PubSubnet1
+      RouteTableId: !Ref RouteTable
+  SubnetRouteTableAssociation1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PubSubnet2
+      RouteTableId: !Ref RouteTable
+
+  MyNATGateway:
+    Type: 'AWS::EC2::NatGateway'
+    DependsOn: MyNATPublicIP
+    Properties:
+      AllocationId: !GetAtt 
+        - MyNATPublicIP
+        - AllocationId
+      SubnetId: !Ref DBSubnet1
+  MyNATPublicIP:
+    Type: 'AWS::EC2::EIP'
+    DependsOn: VPC
+    Properties:
+      Domain: vpc
+  MyprivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+  MyprivateRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref MyprivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref MyNATGateway
+  privateSubnet1RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref DBSubnet1
+      RouteTableId: !Ref MyprivateRouteTable
+  privateSubnet2RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref DBSubnet2
+      RouteTableId: !Ref MyprivateRouteTable
+  AuroraVPCSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for Aurora PostgreSQL Instances.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '5432'
+          ToPort: '5432'
+          CidrIp: 10.0.0.0/20       
+  EncryptionKey:
+    DeletionPolicy: Retain
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Ref AWS::StackName
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+  EncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}"
+      TargetKeyId: !Ref EncryptionKey
+
+  SrcRDSDBClusterParameterGroup: 
+   Properties: 
+     Description: "Aurora PostgreSQL Custom Cluster parameter group"
+     Family: !FindInMap [AuroraVersion, !Ref SrcDBEngineVersion, DBClustergroup]
+     Parameters: 
+      shared_preload_libraries: 'auto_explain, pgaudit, pg_stat_statements, pg_hint_plan'
+      log_connections: 1
+      log_disconnections: 1
+      log_lock_waits: 1
+      log_temp_files: 10240
+      autovacuum_vacuum_cost_delay: 10
+      autovacuum_vacuum_cost_limit: 1000
+      log_min_duration_statement: 5000
+   Type: "AWS::RDS::DBClusterParameterGroup"
+
+
+  SrcRDSDBParameterGroup: 
+   Properties: 
+    Description: "Aurora PostgreSQL Custom DB parameter group"
+    Family: !FindInMap [AuroraVersion, !Ref SrcDBEngineVersion, DBClustergroup]
+    Parameters: 
+      shared_preload_libraries: 'auto_explain, pgaudit, pg_stat_statements, pg_hint_plan'
+      log_connections: 1
+      log_disconnections: 1
+      log_lock_waits: 1
+      log_temp_files: 10240
+      log_min_duration_statement: 5000
+   Type: "AWS::RDS::DBParameterGroup"
+
+  TgtRDSDBClusterParameterGroup: 
+   Properties: 
+     Description: "Aurora PostgreSQL Custom Cluster parameter group"
+     Family: !FindInMap [AuroraVersion, !Ref TgtDBEngineVersion, DBClustergroup]
+     Parameters: 
+      shared_preload_libraries: 'auto_explain, pgaudit, pg_stat_statements, pg_hint_plan'
+      log_connections: 1
+      log_disconnections: 1
+      log_lock_waits: 1
+      log_temp_files: 10240
+      autovacuum_vacuum_cost_delay: 10
+      autovacuum_vacuum_cost_limit: 1000
+      log_min_duration_statement: 5000
+   Type: "AWS::RDS::DBClusterParameterGroup"
+
+
+  TgtRDSDBParameterGroup: 
+   Properties: 
+    Description: "Aurora PostgreSQL Custom DB parameter group"
+    Family: !FindInMap [AuroraVersion, !Ref TgtDBEngineVersion, DBClustergroup]
+    Parameters: 
+      shared_preload_libraries: 'auto_explain, pgaudit, pg_stat_statements, pg_hint_plan'
+      log_connections: 1
+      log_disconnections: 1
+      log_lock_waits: 1
+      log_temp_files: 10240
+      log_min_duration_statement: 5000
+   Type: "AWS::RDS::DBParameterGroup"
+
+  AuroraDBSubnetGroup: 
+    Properties: 
+      DBSubnetGroupDescription: "Subnets available for the Amazon Aurora database instance"
+      SubnetIds: 
+       - !Ref DBSubnet1
+       - !Ref DBSubnet2
+    Type: "AWS::RDS::DBSubnetGroup"
+
+  SrcAuroraDBCluster: 
+    Properties: 
+      BackupRetentionPeriod: 7
+      DBClusterParameterGroupName: !Ref SrcRDSDBClusterParameterGroup 
+      DBClusterIdentifier: !Ref SrcDBClusterName
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      DatabaseName: !Ref SrcDBName
+      Engine: aurora-postgresql
+      EngineVersion: !Ref SrcDBEngineVersion
+      KmsKeyId: !GetAtt EncryptionKey.Arn
+      MasterUserPassword: !Ref SrcDBMasterUserPassword
+      MasterUsername: !Ref SrcDBMasterUsername
+      Port: 5432
+      StorageEncrypted: true
+      VpcSecurityGroupIds: 
+        - !Ref AuroraVPCSecurityGroup
+    Type: "AWS::RDS::DBCluster"
+  SrcAuroraDB:
+    Properties:
+      AutoMinorVersionUpgrade: true
+      DBClusterIdentifier: !Ref SrcAuroraDBCluster
+      DBInstanceClass: !Ref SrcDBInstanceClass
+      DBParameterGroupName: !Ref SrcRDSDBParameterGroup
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+    Type: "AWS::RDS::DBInstance"
+
+  TgtAuroraDBCluster: 
+    Properties: 
+      BackupRetentionPeriod: 7
+      DBClusterParameterGroupName: !Ref TgtRDSDBClusterParameterGroup 
+      DBClusterIdentifier: !Ref TgtDBClusterName
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      DatabaseName: !Ref TgtDBName
+      Engine: aurora-postgresql
+      EngineVersion: !Ref TgtDBEngineVersion
+      KmsKeyId: !GetAtt EncryptionKey.Arn
+      MasterUserPassword: !Ref TgtDBMasterUserPassword
+      MasterUsername: !Ref TgtDBMasterUsername
+      Port: 5432
+      StorageEncrypted: true
+      VpcSecurityGroupIds: 
+        - !Ref AuroraVPCSecurityGroup
+    Type: "AWS::RDS::DBCluster"
+    
+  TgtAuroraDB:
+    Properties:
+      AutoMinorVersionUpgrade: true
+      DBClusterIdentifier: !Ref TgtAuroraDBCluster
+      DBInstanceClass: !Ref TgtDBInstanceClass
+      DBParameterGroupName: !Ref TgtRDSDBParameterGroup
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+    Type: "AWS::RDS::DBInstance"
+  Cloud9DevIAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
+        - 'arn:aws:iam::aws:policy/AWSCloudFormationFullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonRDSFullAccess'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+  Cloud9Environment:
+    Type: 'AWS::Cloud9::EnvironmentEC2'
+    Properties:
+      AutomaticStopTimeMinutes: 60
+      InstanceType: t3.medium
+      Name: !Sub 'Project-${AWS::StackName}'
+      SubnetId: !Ref PubSubnet1

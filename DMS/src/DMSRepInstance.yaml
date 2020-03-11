@@ -1,21 +1,43 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CloudFormation template for importing files from S3.
+Description: CloudFormation template for Launching DMS Replicaion Instance and creating Aurora PostgreSQL Endponts .
+Metadata:
+  LICENSE: Apache License Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Replication Instance details
+      Parameters:
+      - ReplInstanceType
+      - Subnets
+      - RepSecurityGroup
+      - RepMultiAZ
+      - RepAllocatedStorage
+    - Label:
+        default: Source Database details
+      Parameters:
+      - SrcDatabaseConnection
+      - SrcEngineType
+      - SrcDBUsername
+      - SrcDBPassword
+    - Label:
+        default: Target Database details
+      Parameters:
+      - TgtDatabaseConnection
+      - TgtEngineType
+      - TgtDBUsername
+      - TgtDBPassword
 Parameters:
-  ReplicationInstance:
-    Default: dms.c4.large
+  ReplInstanceType:
+    Default: dms.r4.2xlarge
     AllowedValues:
-        - dms.t2.micro
-        - dms.t2.small
-        - dms.t2.medium
-        - dms.t2.large
-        - dms.c4.large
-        - dms.c4.xlarge
         - dms.c4.2xlarge
         - dms.c4.4xlarge
+        - dms.r4.2xlarge
+        - dms.r4.4xlarge
     Description: The instance type to use for the replication instance.
     Type: String
   Subnets:
-    Type: List<AWS::EC2::Subnet::Id>
+    Type: CommaDelimitedList
     Description: List of subnet IDs
 
   RepSecurityGroup:
@@ -34,68 +56,55 @@ Parameters:
     Default: 100
     Description: Allocated storage for Replication Instance
     AllowedPattern: "^[0-9]*$"
-  SrcEngineType:
-    Type: String
-    Description: Provide source database engine type
-    AllowedValues:
-      - "postgres"
-      - "aurora-postgresql"
-  SourceDBUsername:
-    Type: String
-    Description:  Database Username
-    MinLength: 4
-    MaxLength: 64
-  SourceDBPassword:
-    NoEcho: true
-    Type: String
-    Description:  Database Password
-    MinLength: 4
-    MaxLength: 128
   SrcDatabaseConnection:
     Type: String
     Description: "Provide source database connection detail - format hostname:port/dbname"
     AllowedPattern: "^(([a-zA-Z0-9-\\.]*?):([0-9]+)/([a-zA-Z0-9]*))$"
-  
-  
-  TgtEngineType:
+  SrcEngineType:
     Type: String
-    Description: Provide target database engine type
+    Description: Provide source database engine type
+    Default: aurora-postgresql
     AllowedValues:
       - "postgres"
       - "aurora-postgresql"
-      
-  TargetDBUsername:
+  SrcDBUsername:
     Type: String
     Description:  Database Username
+    Default: pgadmin
     MinLength: 4
     MaxLength: 64
-  TargetDBPassword:
+  SrcDBPassword:
     NoEcho: true
     Type: String
+    Default: auradmin
     Description:  Database Password
     MinLength: 4
-    MaxLength: 128    
-TgtDatabaseConnection:
+    MaxLength: 128
+  TgtDatabaseConnection:
     Type: String
     Description: "Provide Target database connection detail - format hostname:port/dbname"
     AllowedPattern:  "^([a-zA-Z0-9-\\.]*?):([0-9]+)/([a-zA-Z0-9]*$)"
+  TgtEngineType:
+    Type: String
+    Description: Provide target database engine type
+    Default: aurora-postgresql
+    AllowedValues:
+      - "postgres"
+      - "aurora-postgresql"
+  TgtDBUsername:
+    Type: String
+    Default: pgadmin
+    Description:  Database Username
+    MinLength: 4
+    MaxLength: 64
+  TgtDBPassword:
+    NoEcho: true
+    Default: auradmin
+    Type: String
+    Description:  Database Password
+    MinLength: 4
+    MaxLength: 128
 
-
-Metadata:
-    AWS::CloudFormation::Interface:
-        ParameterGroups:
-            - Label:
-                default: Replication Instance Information
-              Parameters:
-                - ReplicationInstance
-                - ReplicationSecurityGroups
-                - S3BucketName
-                - ServiceRoleArn
-        ParameterLabels:
-            ReplicationInstance:
-                default: Instance class
-            ReplicationSecurityGroups:
-                default: Security group
 
 Resources:
   ReplicationSubnetGroup:
@@ -110,36 +119,49 @@ Resources:
       AllocatedStorage: !Ref RepAllocatedStorage
       MultiAZ: !Ref RepMultiAZ
       PubliclyAccessible: false
+      EngineVersion: "3.3.1"
       AutoMinorVersionUpgrade: false
       ReplicationSubnetGroupIdentifier: !Ref ReplicationSubnetGroup
-      ReplicationInstanceClass:
-        Ref: ReplicationInstance
+      ReplicationInstanceClass: !Ref ReplInstanceType
+      ReplicationInstanceIdentifier:
+        !Join 
+          - '-'
+          - - 'ReplicationInstance'
+            - !Ref 'AWS::StackName'
 
   SrcDMSEndpoint:
     Type: AWS::DMS::Endpoint
     Properties:
-      EndpointIdentifier: PGSrcdb
+      EndpointIdentifier: 
+        !Join 
+          - '-'
+          - - 'pgSrcDB'
+            - !Ref 'AWS::StackName'
       EndpointType: source
       EngineName: !Ref SrcEngineType
       ServerName: !Select [0, !Split [":", !Ref SrcDatabaseConnection]]
       DatabaseName: !Select [1, !Split ["/", !Ref SrcDatabaseConnection]]
       Port: !Select [1, !Split [":",!Select [0, !Split ["/", !Ref SrcDatabaseConnection]]]]
-      Username: !Ref SourceDBUsername
-      Password: !Ref SourceDBPassword
+      Username: !Ref SrcDBUsername
+      Password: !Ref SrcDBPassword
 
 
   TgtDMSEndpoint:
     Type: AWS::DMS::Endpoint
     Properties:
-      EndpointIdentifier: PGTgtdb
+      EndpointIdentifier: 
+        !Join 
+          - '-'
+          - - 'pgTgtDB'
+            - !Ref 'AWS::StackName'
       EndpointType: target
       EngineName: !Ref TgtEngineType
       ExtraConnectionAttributes: "maxFileSize=1048576"
       ServerName: !Select [0, !Split [":",!Ref TgtDatabaseConnection]]
       DatabaseName: !Select [1, !Split ["/",!Ref TgtDatabaseConnection]]
       Port: !Select [1, !Split [":",!Select [0, !Split ["/", !Ref TgtDatabaseConnection]]]]
-      Username: !Ref TargetDBUsername
-      Password: !Ref TargetDBPassword
+      Username: !Ref TgtDBUsername
+      Password: !Ref TgtDBPassword
 Outputs:
   ReplicationInstanceArn:
     Description: Replication Instance Arn
