@@ -11,7 +11,7 @@
 	"FullLoadSettings":
 				{"FullLoadEnabled": true,
 				"ApplyChangesEnabled": true,
-				"TargetTablePrepMode": "TRUNCATE_BEFORE_LOAD",
+				"TargetTablePrepMode": "DO_NOTHING",
 				"CreatePkAfterFullLoad": false,
 				"StopTaskCachedChangesApplied": true,
 				"StopTaskCachedChangesNotApplied": false,
@@ -38,6 +38,11 @@
 						     "Severity": "LOGGER_SEVERITY_DETAILED_DEBUG"
 						  }]
 				},
+	 "ChangeProcessingDdlHandlingPolicy": {
+            "HandleSourceTableDropped": false,
+            "HandleSourceTableTruncated": false,
+            "HandleSourceTableAltered": false
+          },
 	"ControlTablesSettings":
 				{ "historyTimeslotInMinutes": 5,
 				"ControlSchema": "",
