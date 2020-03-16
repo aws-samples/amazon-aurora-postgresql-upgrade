@@ -277,30 +277,12 @@ Resources:
     Properties:
       SubnetId: !Ref PubSubnet2
       RouteTableId: !Ref RouteTable
-
-  MyNATGateway:
-    Type: 'AWS::EC2::NatGateway'
-    DependsOn: MyNATPublicIP
-    Properties:
-      AllocationId: !GetAtt 
-        - MyNATPublicIP
-        - AllocationId
-      SubnetId: !Ref DBSubnet1
-  MyNATPublicIP:
-    Type: 'AWS::EC2::EIP'
-    DependsOn: VPC
-    Properties:
-      Domain: vpc
+      
   MyprivateRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
-  MyprivateRoute:
-    Type: 'AWS::EC2::Route'
-    Properties:
-      RouteTableId: !Ref MyprivateRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref MyNATGateway
+
   privateSubnet1RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
