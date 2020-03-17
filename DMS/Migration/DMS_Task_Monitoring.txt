@@ -1,0 +1,39 @@
+####################################################################################
+# This document lists step to enable Cloudwatch alarms for DMS tasks
+# Prerequisites: 
+# - DMS Tasks are running in CDC Mode
+# - SNS Topic is created and appropriate subscriptions have been registered
+#
+####################################################################################
+
+#Set environment variables DMS_TASK_ARN1 and DMS_TASK_ARN2 to DMS Task Arn
+# CDCLatencySource and CDCLatencyTarget Alarm for Task 1
+export SNS_TOPIC=topic_arn
+export metric_name=CDCLatencySource
+# Set the replication instance identifier 
+export rep_inst_identifier="dmsreplicationinstance-so7ry6kb49stu8te"
+export task_identifier=$(echo $DMS_TASK_ARN1|awk -F ":" '{print $NF}')
+alarm_name=${rep_inst_identifier}-${metric_name}-${task_identifier}
+
+
+aws cloudwatch put-metric-alarm --alarm-name ${alarm_name} --alarm-description "CDC Source latency greater than 15 mins" --metric-name CDCLatencySource --namespace "AWS/DMS" --statistic Average --period 60 --threshold 900 --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1 --dimensions "Name=ReplicationInstanceIdentifier,Value=${rep_inst_identifier}" "Name=ReplicationTaskIdentifier,Value=${task_identifier}" --alarm-actions $SNS_TOPIC --treat-missing-data "notBreaching"
+
+export metric_name=CDCLatencyTarget
+export alarm_name=${rep_inst_identifier}-${metric_name}-${task_identifier}
+
+aws cloudwatch put-metric-alarm --alarm-name ${alarm_name} --alarm-description "CDC target latency greater than 15 mins" --metric-name CDCLatencyTarget --namespace "AWS/DMS" --statistic Average --period 60 --threshold 900 --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1 --dimensions "Name=ReplicationInstanceIdentifier,Value=${rep_inst_identifier}" "Name=ReplicationTaskIdentifier,Value=${task_identifier}" --alarm-actions $SNS_TOPIC --treat-missing-data "notBreaching"
+
+# CDCLatencySource and CDCLatencyTarget Alarm for Task 2
+
+export metric_name=CDCLatencySource
+export rep_inst_identifier="dmsreplicationinstance-so7ry6kb49stu8te"
+export task_identifier=$(echo $DMS_TASK_ARN2|awk -F ":" '{print $NF}')
+alarm_name=${rep_inst_identifier}-${metric_name}-${task_identifier}
+
+
+aws cloudwatch put-metric-alarm --alarm-name ${alarm_name} --alarm-description "CDC Source latency greater than 15 mins" --metric-name CDCLatencySource --namespace "AWS/DMS" --statistic Average --period 60 --threshold 900 --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1 --dimensions "Name=ReplicationInstanceIdentifier,Value=${rep_inst_identifier}" "Name=ReplicationTaskIdentifier,Value=${task_identifier}" --alarm-actions $SNS_TOPIC --treat-missing-data "notBreaching"
+
+export metric_name=CDCLatencyTarget
+export alarm_name=${rep_inst_identifier}-${metric_name}-${task_identifier}
+
+aws cloudwatch put-metric-alarm --alarm-name ${alarm_name} --alarm-description "CDC target latency greater than 15 mins" --metric-name CDCLatencyTarget --namespace "AWS/DMS" --statistic Average --period 60 --threshold 900 --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1 --dimensions "Name=ReplicationInstanceIdentifier,Value=${rep_inst_identifier}" "Name=ReplicationTaskIdentifier,Value=${task_identifier}" --alarm-actions $SNS_TOPIC --treat-missing-data "notBreaching"
