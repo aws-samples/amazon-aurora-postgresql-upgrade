@@ -1,3 +1,4 @@
+-- Sample script to create secondary indexes in Target PostgreSQL database. To be executed on full load completion
 CREATE INDEX se_start_date_fcn ON dms_sample.sporting_event USING btree (date(start_date_time));
 CREATE INDEX seat_sport_location_idx ON dms_sample.seat USING btree (sport_location_id);
 CREATE INDEX set_ev_id_tkholder_id_idx ON dms_sample.sporting_event_ticket USING btree (sporting_event_id, ticketholder_id);

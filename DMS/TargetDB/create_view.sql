@@ -1,3 +1,4 @@
+--  Sample script to create views in target PostgreSQL datatabase
 CREATE VIEW dms_sample.sporting_event_info AS
  SELECT e.id AS event_id,
     e.sport_type_name AS sport,

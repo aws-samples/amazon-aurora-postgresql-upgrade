@@ -1,2 +1,2 @@
--- Identify long running sessions in PostgreSQL
+-- Sample query to identify long running sessions in PostgreSQL 10 and 11
 select pid,usename,application_name,now()-xact_start as xactstart,now()-query_start as query_starttime,now()-state_change as statechange,wait_event_type,wait_event,state,query from pg_stat_activity where state not in ('idle','idle in transaction')  and (now() - pg_stat_activity.query_start) > interval '2 minutes' order by  xactstart;

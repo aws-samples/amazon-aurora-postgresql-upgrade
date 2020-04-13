@@ -1,3 +1,5 @@
+-- Sample script to grant permissions on objects in Target PostgreSQL database
+
 GRANT ALL ON SEQUENCE dms_sample.player_seq TO dms_user;
 GRANT ALL ON SEQUENCE dms_sample.sport_location_seq TO dms_user;
 GRANT ALL ON SEQUENCE dms_sample.sport_team_seq TO dms_user;

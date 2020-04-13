@@ -1,3 +1,4 @@
+-- Sample query to identify tables which are missing primary key constraint (Tested on PostgreSQL 10 and 11)
 select tab.table_schema, tab.table_name
 from information_schema.tables tab
 left join information_schema.table_constraints tco 

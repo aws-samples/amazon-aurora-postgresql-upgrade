@@ -1,3 +1,4 @@
+-- Sample script to create functions in target PostgreSQL database
 CREATE FUNCTION dms_sample.edate_add(expr1 timestamp with time zone, expr2 text, unit anyelement) RETURNS anyelement
     LANGUAGE plpgsql
     AS $$

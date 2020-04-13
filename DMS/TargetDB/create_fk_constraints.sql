@@ -1,3 +1,5 @@
+-- Sample script to create foreign key constraints in target PostgreSQL database
+
 ALTER TABLE ONLY dms_sample.player
     ADD CONSTRAINT sport_team_fk_741577680 FOREIGN KEY (sport_team_id) REFERENCES dms_sample.sport_team(id) NOT VALID;
 ALTER TABLE ONLY dms_sample.seat

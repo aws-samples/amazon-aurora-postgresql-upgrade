@@ -1,3 +1,5 @@
+-- Sample script to create schema and tables in target PostgreSQL datatabase
+
 create schema dms_sample;
 CREATE SEQUENCE dms_sample.player_seq
     START WITH 1

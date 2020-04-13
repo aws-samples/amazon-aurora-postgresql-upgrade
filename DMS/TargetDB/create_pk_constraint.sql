@@ -1,3 +1,5 @@
+ -- Sample script to create primary key constraints in target PostgreSQL datatabase
+
 ALTER TABLE ONLY dms_sample.mlb_data
     ADD CONSTRAINT mlb_data_pkey PRIMARY KEY (mlb_id);
 ALTER TABLE ONLY dms_sample.name_data
