@@ -1,0 +1,100 @@
+### Sample queries to perform object comparison in PostgreSQL 10 and 11 ####
+
+=======SQL's for Comparison of objects : =======
+
+========Table Count ===========================
+
+SELECT count(1) AS tables_cnt
+  FROM pg_tables
+ WHERE schemaname = lower('schema_name')
+
+ ========Views Count ===========================
+
+ SELECT count(1) AS views_cnt
+  FROM pg_views
+ WHERE schemaname = lower('schema_name');
+
+
+========sequences Count ===========================
+
+ SELECT count(1) AS sequence_cnt
+   FROM information_schema.sequences
+  WHERE sequence_schema = lower('schema_name')
+
+========Triggers Count ===========================
+
+ SELECT
+       upper(trigger_schema)     AS schema_name,
+       upper(trigger_name)       AS trigger_name,
+       upper(event_object_table) AS table_name,
+       string_agg(upper(event_manipulation), ' OR ' ORDER BY CASE WHEN  event_manipulation = 'INSERT' THEN 1 WHEN event_manipulation = 'UPDATE' THEN 2 ELSE 3 END) AS triggering_event,
+       upper(action_timing) || ' ' || CASE WHEN action_orientation = 'ROW' THEN 'EACH ROW' ELSE action_orientation END AS trigger_type
+  FROM information_schema.triggers
+ WHERE trigger_schema = lower('schema_name')
+GROUP BY trigger_schema, trigger_name, event_object_table, action_timing, action_orientation
+ORDER BY upper(trigger_name);
+
+
+========Primary Keys Count ===========================
+
+SELECT upper(n.nspname)        AS schema_name,
+       trim(upper(split_part(conrelid::regclass::varchar, '.', 2)), '"') AS table_name,
+       upper(conname::varchar) AS object_name,
+       'PRIMARY KEY'           AS object_type
+  FROM pg_constraint c
+       JOIN pg_namespace n ON n.oid = c.connamespace
+ WHERE contype in ('p')
+   AND n.nspname = lower('schema_name')
+
+
+========Indexes Count ===========================
+
+   SELECT upper(schemaname) AS schema_name,
+       upper(tablename)  AS table_name,
+       upper(indexname)  AS object_name,
+       'INDEX'           AS object_type,
+       upper(replace(indexdef, '"', ''))   AS condition_column
+  FROM pg_indexes
+ WHERE schemaname = lower('schema_name')
+
+
+========Check Constraints Count ===========================
+
+ SELECT
+       table_name,
+       object_name,
+       constraint_type,
+       upper(trim(replace(replace(replace(replace(check_condition, '"', ''), '(', ''), ')', ''), 'CHECK', ''))) check_condition
+  FROM (
+    SELECT
+           upper(n.nspname)||'.'||upper(c.relname) AS table_name,
+           'SYS_C0000'||attnum                     AS object_name,
+           'CHECK'                                 AS constraint_type,
+           a.attname||' IS NOT NULL' AS check_condition
+      FROM pg_attribute a, pg_class c, pg_namespace n
+     WHERE a.attrelid = c.oid and c.relnamespace = n.oid AND n.nspname = lower('schema_name')
+       AND attnotnull AND attstattarget <> 0
+     UNION
+    SELECT
+           upper(conrelid::regclass::varchar)     AS table_name,
+           upper(conname::varchar)                AS object_name,
+           'CHECK'                                AS constraint_type,
+           pg_get_constraintdef(c.oid)            AS check_condition
+      FROM pg_constraint c
+           JOIN pg_namespace n ON n.oid = c.connamespace
+     WHERE  contype in ('c')
+       AND conrelid::regclass::varchar <> '-'
+       AND n.nspname = lower('schema_name')
+) a;
+
+
+===========Foreign Keys Count ==========================
+
+SELECT upper(n.nspname::text)     AS schema_name,
+       trim(upper(split_part(conrelid::regclass::varchar, '.', 2)), '"') AS table_name, upper(conname::varchar)    AS object_name,
+       'FOREIGN KEY'       AS object_type,
+       CASE contype WHEN 'f' THEN upper(pg_get_constraintdef(c.oid)) END AS  condition_column
+  FROM pg_constraint c
+       JOIN pg_namespace n ON n.oid = c.connamespace
+ WHERE contype in ('f')
+   AND n.nspname::text = lower('schema_name')
