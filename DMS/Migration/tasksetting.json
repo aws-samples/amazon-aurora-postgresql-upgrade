@@ -26,16 +26,16 @@
 						    "Severity": "LOGGER_SEVERITY_DEFAULT"
 						   },{
 						     "Id": "TARGET_LOAD",
-						     "Severity": "LOGGER_SEVERITY_DETAILED_DEBUG"
+						     "Severity": "LOGGER_SEVERITY_DEFAULT"
 						   },{
 						     "Id": "SOURCE_CAPTURE",
 						     "Severity": "LOGGER_SEVERITY_DEFAULT"
 						   },{
 						     "Id": "TARGET_APPLY",
-						     "Severity": "LOGGER_SEVERITY_DETAILED_DEBUG"
+						     "Severity": "LOGGER_SEVERITY_DEFAULT"
 						   },{
 						     "Id": "TASK_MANAGER",
-						     "Severity": "LOGGER_SEVERITY_DETAILED_DEBUG"
+						     "Severity": "LOGGER_SEVERITY_DEFAULT"
 						  }]
 				},
 	 "ChangeProcessingDdlHandlingPolicy": {
@@ -52,9 +52,9 @@
 				"StatusTableEnabled": false
 				},
 	"StreamBufferSettings":
-				{ "StreamBufferCount": 30,
-				"StreamBufferSizeInMB": 32,
-				"CtrlStreamBufferSizeInMB": 8
+				{ "StreamBufferCount": 6,
+				"StreamBufferSizeInMB": 8,
+				"CtrlStreamBufferSizeInMB": 4
 				},
 	"ErrorBehavior":
 				{ "DataErrorPolicy": "LOG_ERROR",
